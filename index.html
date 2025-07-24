@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirection aléatoire (terre seulement)</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+
+    .loader {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .loader div {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #333;
+      border-radius: 50%;
+      animation: fade 1.2s linear infinite;
+    }
+
+    .loader div:nth-child(1) {
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, 0);
+      animation-delay: -1.05s;
+    }
+    .loader div:nth-child(2) {
+      top: 14%;
+      left: 85%;
+      transform: translate(-50%, -50%);
+      animation-delay: -0.9s;
+    }
+    .loader div:nth-child(3) {
+      top: 50%;
+      left: 100%;
+      transform: translate(-50%, -50%);
+      animation-delay: -0.75s;
+    }
+    .loader div:nth-child(4) {
+      top: 85%;
+      left: 85%;
+      transform: translate(-50%, -50%);
+      animation-delay: -0.6s;
+    }
+    .loader div:nth-child(5) {
+      top: 100%;
+      left: 50%;
+      transform: translate(-50%, -100%);
+      animation-delay: -0.45s;
+    }
+    .loader div:nth-child(6) {
+      top: 85%;
+      left: 14%;
+      transform: translate(-50%, -50%);
+      animation-delay: -0.3s;
+    }
+    .loader div:nth-child(7) {
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+      animation-delay: -0.15s;
+    }
+    .loader div:nth-child(8) {
+      top: 14%;
+      left: 14%;
+      transform: translate(-50%, -50%);
+      animation-delay: 0s;
+    }
+
+    @keyframes fade {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.3;
+        transform: scale(0.6);
+      }
+    }
+  </style>
+  <script>
+    function getRandomCoordinates() {
+      const latitude = (Math.random() * 170 - 85).toFixed(6);
+      const longitude = (Math.random() * 360 - 180).toFixed(6);
+      return { latitude, longitude };
+    }
+
+    async function isOnLand(lat, lon) {
+      const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=5`;
+      try {
+        const response = await fetch(url, {
+          headers: { 'User-Agent': 'RandomMapRedirect/1.0' }
+        });
+        if (!response.ok) return false;
+
+        const data = await response.json();
+        return !!data.address;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    async function findLandCoordinates() {
+      let coords;
+      let found = false;
+      while (!found) {
+        coords = getRandomCoordinates();
+        found = await isOnLand(coords.latitude, coords.longitude);
+        await new Promise(r => setTimeout(r, 1000)); // limite les requêtes
+      }
+      return coords;
+    }
+
+    async function redirectToLandLocation() {
+      const { latitude, longitude } = await findLandCoordinates();
+      const zoomLevel = 6;
+      const mapsUrl = `https://www.google.com/maps/place/${latitude},${longitude}/@${latitude},${longitude},${zoomLevel}z`;
+      window.location.href = mapsUrl;
+    }
+
+    window.onload = redirectToLandLocation;
+  </script>
+</head>
+<body>
+  <div class="loader">
+    <div></div><div></div><div></div><div></div>
+    <div></div><div></div><div></div><div></div>
+  </div>
+</body>
+</html>
