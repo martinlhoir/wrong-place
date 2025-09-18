@@ -50,7 +50,6 @@
   #message { font-weight:bold; font-size:18px; margin-top:10px; transition: opacity 0.5s; }
   .fade-in { animation: fadeIn 0.5s; }
   @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-  /* Confetti canvas */
   #confetti-canvas {
     position: fixed;
     top:0; left:0;
@@ -87,7 +86,7 @@
 </div>
 
 <script>
-// === QUESTIONS ===
+// === QUESTIONS SIMPLIFIÉES POUR L'EXEMPLE ===
 const motsRares = [
   { mot: "Escarboucle", choix: ["Precious stone", "Carpentry tool", "Water bird"], reponse: "Precious stone" },
   { mot: "Chalemie", choix: ["Medieval wind instrument", "Poisonous plant", "Part of a ship"], reponse: "Medieval wind instrument" },
@@ -146,10 +145,14 @@ const motsRares = [
   { mot: "Tintamarre", choix: ["Loud noise", "Ancient coin", "Rare plant"], reponse: "Loud noise" },
   { mot: "Ulcération", choix: ["Wound", "Ancient robe", "Rare bird"], reponse: "Wound" },
   { mot: "Vaticination", choix: ["Prophecy", "Ancient weapon", "Rare jewel"], reponse: "Prophecy" },
-  { mot: "Zigomar", choix: ["Mischievous person", "Ancient tax", "Rare plant"], reponse: "Mischievous person" }
+  { mot: "Zigomar", choix: ["Mischievous person", "Ancient tax", "Rare plant"], reponse: "Mischievous person" },
+  { mot: "Épenthèse", choix: ["Insertion of a sound", "Old map", "Rare bird"], reponse: "Insertion of a sound" },
+  { mot: "Aporie", choix: ["Philosophical puzzle", "Ancient ritual", "Type of food"], reponse: "Philosophical puzzle" },
+  { mot: "Chicane", choix: ["Petty quarrel", "Type of tool", "Rare flower"], reponse: "Petty quarrel" },
+  { mot: "Dysphorie", choix: ["Uneasy feeling", "Ancient coin", "Rare stone"], reponse: "Uneasy feeling"
 ];
-
-// === BLAGUE VOLONTAIRE ===
+  
+// Blague volontaire
 const motsBlagues = [
   { mot: "Bite", choix: ["Hello", "Harmonica", "Branch"], reponse: "Hello" }
 ];
@@ -157,24 +160,33 @@ const motsBlagues = [
 let quizQuestions = [];
 let currentIndex = 0;
 let score = 0;
+let confettiInterval = null; // 🔹 Pour gérer l'arrêt du confetti
 
 function shuffleArray(array) {
   return array.sort(() => Math.random() - 0.5);
 }
 
 function startGame() {
-  // On prend d'abord 10 questions normales
+  // 🔹 Nettoyer confettis si on relance une partie
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (confettiInterval) {
+    clearInterval(confettiInterval);
+    confettiInterval = null;
+  }
+
+  // 🔹 Sélection de 10 questions
   quizQuestions = shuffleArray(motsRares).slice(0, 10);
 
-  // 🎲 1 chance sur 3 de remplacer une question par la blague
+  // 🔹 1 chance sur 3 d'ajouter la blague
   if (Math.random() < 1/3) {
-    const blague = motsBlagues[Math.floor(Math.random() * motsBlagues.length)];
+    const blague = motsBlagues[0];
     const randomIndex = Math.floor(Math.random() * quizQuestions.length);
     quizQuestions[randomIndex] = blague;
   }
 
   quizQuestions = shuffleArray(quizQuestions);
-
   currentIndex = 0;
   score = 0;
 
@@ -221,19 +233,9 @@ function endGame() {
   document.getElementById("quiz-screen").style.display = "none";
   document.getElementById("end-screen").style.display = "block";
 
-  if (score <= 4) {
-    document.getElementById("end-title").textContent = "Game Over";
-  } else {
-    document.getElementById("end-title").textContent = "Welcome in Belgium";
-  }
-
+  document.getElementById("end-title").textContent = score <= 4 ? "Game Over" : "Welcome in Belgium";
   document.getElementById("final-score").textContent = `Your final score: ${score} / 10`;
-
-  let msg = "";
-  if (score < 5) msg = "Too bad, maybe another time";
-  else if (score < 10) msg = "Well done, but not excellent";
-  else msg = "Just too strong!";
-  document.getElementById("final-message").textContent = msg;
+  document.getElementById("final-message").textContent = score < 5 ? "Too bad, maybe another time" : (score < 10 ? "Well done, but not excellent" : "Just too strong!");
 
   launchConfetti();
 }
@@ -267,20 +269,10 @@ function launchConfetti() {
       ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2, true);
       ctx.fill();
     });
-    updateConfetti();
+    confettis.forEach(c => { c.y += c.d * 4; if (c.y > canvas.height) { c.y = -10; c.x = Math.random() * canvas.width; } });
   }
 
-  function updateConfetti() {
-    confettis.forEach(c => {
-      c.y += c.d * 4;
-      if (c.y > canvas.height) {
-        c.y = -10;
-        c.x = Math.random() * canvas.width;
-      }
-    });
-  }
-
-  setInterval(drawConfetti, 20);
+  confettiInterval = setInterval(drawConfetti, 20);
 }
 
 document.getElementById("start-btn").onclick = startGame;
