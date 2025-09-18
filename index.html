@@ -1,155 +1,201 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hola → I wish you a good day</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg1: #0f172a;
-      --bg2: #081028;
-      --accent1: #ff8a00;
-      --accent2: #ff2d95;
-      --accent3: #7cf7d4;
-    }
-    html,body{height:100%;margin:0}
-    body{
-      display:grid;place-items:center;min-height:100%;
-      background: radial-gradient(1200px 600px at 10% 20%, rgba(255,138,0,0.07), transparent 10%),
-                  radial-gradient(900px 500px at 90% 80%, rgba(124,247,212,0.03), transparent 10%),
-                  linear-gradient(180deg,var(--bg1),var(--bg2));
-      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-      color: #fff;overflow:hidden
-    }
+import React, { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
-    .stage{
-      width:100%;max-width:1400px;padding:40px;box-sizing:border-box;text-align:center;position:relative;
-      display:flex;flex-direction:column;align-items:center;gap:18px
-    }
+// 60 questions
+const motsRares = [
+  { mot: "Escarboucle", choix: ["Precious stone", "Carpentry tool", "Water bird"], reponse: "Precious stone" },
+  { mot: "Chalemie", choix: ["Medieval wind instrument", "Poisonous plant", "Part of a ship"], reponse: "Medieval wind instrument" },
+  { mot: "Obombrer", choix: ["To darken with a shadow", "To cover with paint", "To reduce to dust"], reponse: "To darken with a shadow" },
+  { mot: "Sybarite", choix: ["Person who loves luxury", "Small nocturnal mammal", "Ancient blacksmith trade"], reponse: "Person who loves luxury" },
+  { mot: "Raisiné", choix: ["Grape jam", "Volcanic rock", "Religious chant"], reponse: "Grape jam" },
+  { mot: "Amphigouri", choix: ["Obscure speech", "Ancient clothing", "Old currency"], reponse: "Obscure speech" },
+  { mot: "Lambrequin", choix: ["Drapery ornament", "Musical instrument", "Climbing plant"], reponse: "Drapery ornament" },
+  { mot: "Péroraison", choix: ["Conclusion of a speech", "Agricultural tool", "Religious ritual"], reponse: "Conclusion of a speech" },
+  { mot: "Luzerne", choix: ["Forage plant", "Precious stone", "Type of ship"], reponse: "Forage plant" },
+  { mot: "Mirliton", choix: ["Small musical instrument", "Bird", "Ancient pastry"], reponse: "Small musical instrument" },
+  { mot: "Alcarazas", choix: ["Large ceramic jar", "Ancient helmet", "Old currency"], reponse: "Large ceramic jar" },
+  { mot: "Boustrophédon", choix: ["Ancient writing style", "Musical instrument", "Type of sword"], reponse: "Ancient writing style" },
+  { mot: "Cacochyme", choix: ["Weak or sickly person", "Rare mineral", "Old clothing"], reponse: "Weak or sickly person" },
+  { mot: "Didascalie", choix: ["Stage direction", "Type of food", "Mathematical term"], reponse: "Stage direction" },
+  { mot: "Eburnéen", choix: ["Ivory-colored", "Poisonous plant", "Small bird"], reponse: "Ivory-colored" },
+  { mot: "Farfelu", choix: ["Crazy or odd", "Precious stone", "Type of boat"], reponse: "Crazy or odd" },
+  { mot: "Gabelle", choix: ["Salt tax", "Ancient weapon", "Musical note"], reponse: "Salt tax" },
+  { mot: "Histrion", choix: ["Actor or performer", "Rare coin", "Type of fruit"], reponse: "Actor or performer" },
+  { mot: "Inénarrable", choix: ["Indescribable", "Old ship", "Rare book"], reponse: "Indescribable" },
+  { mot: "Jocrisse", choix: ["Foolish person", "Ancient hat", "Type of tree"], reponse: "Foolish person" },
+  { mot: "Kermesse", choix: ["Village fair", "Type of drum", "Old coin"], reponse: "Village fair" },
+  { mot: "Limonadier", choix: ["Lemon seller", "Ancient ruler", "Stage equipment"], reponse: "Lemon seller" },
+  { mot: "Mandibule", choix: ["Jawbone", "Tool", "Type of hat"], reponse: "Jawbone" },
+  { mot: "Nitescence", choix: ["Brightness", "Ancient path", "Rare gemstone"], reponse: "Brightness" },
+  { mot: "Obnubilé", choix: ["Obscured", "Rare instrument", "Old letter"], reponse: "Obscured" },
+  { mot: "Pusillanime", choix: ["Cowardly", "Small tool", "Rare bird"], reponse: "Cowardly" },
+  { mot: "Quidam", choix: ["Someone", "Ancient coin", "Type of fish"], reponse: "Someone" },
+  { mot: "Ratiociner", choix: ["To reason", "Old book", "Ancient clothing"], reponse: "To reason" },
+  { mot: "Sésame", choix: ["Sesame", "Rare stone", "Ancient weapon"], reponse: "Sesame" },
+  { mot: "Tautologie", choix: ["Redundant expression", "Mathematical term", "Old ritual"], reponse: "Redundant expression" },
+  { mot: "Ubiquité", choix: ["Ubiquity", "Rare bird", "Ancient path"], reponse: "Ubiquity" },
+  { mot: "Velléitaire", choix: ["Indecisive", "Small coin", "Old tool"], reponse: "Indecisive" },
+  { mot: "Wassingue", choix: ["Mop", "Ancient tool", "Rare plant"], reponse: "Mop" },
+  { mot: "Xylographie", choix: ["Wood engraving", "Ancient map", "Rare jewel"], reponse: "Wood engraving" },
+  { mot: "Ypérite", choix: ["Mustard gas", "Old book", "Rare flower"], reponse: "Mustard gas" },
+  { mot: "Zélateur", choix: ["Zealot", "Small tool", "Ancient coin"], reponse: "Zealot" },
+  { mot: "Aboulie", choix: ["Lack of willpower", "Ancient coin", "Rare stone"], reponse: "Lack of willpower" },
+  { mot: "Boustifailler", choix: ["To eat greedily", "Type of tool", "Old musical instrument"], reponse: "To eat greedily" },
+  { mot: "Cacique", choix: ["Tribal chief", "Rare flower", "Ancient map"], reponse: "Tribal chief" },
+  { mot: "Dysphorie", choix: ["Unease or dissatisfaction", "Ancient coin", "Old weapon"], reponse: "Unease or dissatisfaction" },
+  { mot: "Enclume", choix: ["Anvil", "Rare plant", "Old hat"], reponse: "Anvil" },
+  { mot: "Falbala", choix: ["Frill or ruffle", "Ancient map", "Rare stone"], reponse: "Frill or ruffle" },
+  { mot: "Gouailleur", choix: ["Cheeky person", "Ancient tool", "Rare bird"], reponse: "Cheeky person" },
+  { mot: "Hiatus", choix: ["Gap or pause", "Rare mineral", "Old coin"], reponse: "Gap or pause" },
+  { mot: "Ignare", choix: ["Ignorant person", "Ancient book", "Rare plant"], reponse: "Ignorant person" },
+  { mot: "Joubarbe", choix: ["Houseleek plant", "Ancient weapon", "Rare flower"], reponse: "Houseleek plant" },
+  { mot: "Kératose", choix: ["Horny skin condition", "Old coin", "Ancient tool"], reponse: "Horny skin condition" },
+  { mot: "Lugubre", choix: ["Gloomy or dark", "Rare instrument", "Ancient map"], reponse: "Gloomy or dark" },
+  { mot: "Miasme", choix: ["Unpleasant vapor", "Old book", "Rare mineral"], reponse: "Unpleasant vapor" },
+  { mot: "Néphélococcygie", choix: ["Cloud cuckoo land", "Ancient coin", "Old tool"], reponse: "Cloud cuckoo land" },
+  { mot: "Obséquieux", choix: ["Obsequious", "Rare stone", "Ancient bird"], reponse: "Obsequious" },
+  { mot: "Phrénologie", choix: ["Study of skull shape", "Ancient map", "Old plant"], reponse: "Study of skull shape" },
+  { mot: "Quérulence", choix: ["Complaining", "Ancient coin", "Rare mineral"], reponse: "Complaining" },
+  { mot: "Rubicond", choix: ["Red-faced", "Rare plant", "Ancient weapon"], reponse: "Red-faced" },
+  { mot: "Saponifier", choix: ["To turn into soap", "Ancient book", "Old coin"], reponse: "To turn into soap" },
+  { mot: "Ténébreux", choix: ["Dark or gloomy", "Old tool", "Rare jewel"], reponse: "Dark or gloomy" },
+  { mot: "Ursidé", choix: ["Bear family", "Ancient instrument", "Rare plant"], reponse: "Bear family" },
+  { mot: "Vaticiner", choix: ["To prophesy", "Old coin", "Rare stone"], reponse: "To prophesy" },
+  { mot: "Wapiti", choix: ["Elk", "Ancient tool", "Rare flower"], reponse: "Elk" },
+  { mot: "Xénophile", choix: ["Loves foreigners", "Old weapon", "Rare plant"], reponse: "Loves foreigners" },
+  { mot: "Yogi", choix: ["Practitioner of yoga", "Ancient coin", "Rare bird"], reponse: "Practitioner of yoga" },
+  { mot: "Zythum", choix: ["Ancient beer", "Rare stone", "Old map"], reponse: "Ancient beer" },
+];
 
-    .hola{
-      font-family:'Playfair Display', 'Georgia', serif;
-      font-size: clamp(80px, 20vw, 260px);
-      line-height:0.95;
-      font-weight:700;
-      letter-spacing: -1px;
-      background: linear-gradient(90deg, var(--accent1), var(--accent2) 50%, var(--accent3));
-      -webkit-background-clip:text;background-clip:text;color:transparent;
-      filter: drop-shadow(0 8px 30px rgba(0,0,0,0.6));
-      opacity:0;transform:scale(0.8) rotate(-5deg);
-      transition:all 1.5s cubic-bezier(.2,.9,.25,1);
-      -webkit-text-stroke: 1px rgba(255,255,255,0.08);
-      position:relative;
-    }
-    .hola.show{opacity:1;transform:scale(1) rotate(0)}
+// Fonction pour mélanger les tableaux
+function melangerTableau(tableau) {
+  return [...tableau].sort(() => Math.random() - 0.5);
+}
 
-    .hola.exit{
-      animation: holaExit 2s ease forwards;
-    }
-    @keyframes holaExit{
-      0% {opacity:1; transform: translateY(0) rotate(0deg) scale(1); filter: blur(0px)}
-      40%{transform: translateY(-30px) rotate(-6deg) scale(1.15); filter: blur(1px)}
-      100%{opacity:0; transform: translateY(-200px) rotate(-15deg) scale(0.7); filter: blur(8px)}
-    }
+// Jeu complet
+export default function JeuMots() {
+  const [started, setStarted] = useState(false);
+  const [fini, setFini] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [index, setIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [message, setMessage] = useState("");
 
-    .message{
-      font-size: clamp(48px, 9vw, 100px);
-      font-weight:700;
-      line-height:1.2;
-      font-family: 'Playfair Display', serif;
-      display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;
-      opacity:0;
+  useEffect(() => {
+    if (started) {
+      const melange = melangerTableau(motsRares).slice(0, 10); // 10 questions aléatoires
+      setQuestions(melange);
+      setIndex(0);
+      setScore(0);
+      setFini(false);
     }
+  }, [started]);
 
-    .message span{
-      display:inline-block;
-      opacity:0;
-      transform: scale(0.5) translateY(20px);
+  const verifierReponse = (choix) => {
+    if (!questions[index]) return;
+    if (choix === questions[index].reponse) {
+      setScore((s) => s + 1);
+      setMessage("✅ Correct answer!");
+    } else {
+      setMessage("❌ Wrong answer!");
     }
+    setTimeout(() => {
+      setMessage("");
+      if (index + 1 < 10) {
+        setIndex((prev) => prev + 1);
+      } else {
+        setFini(true);
+      }
+    }, 1000);
+  };
 
-    .message.show span{
-      animation: letterIn 0.8s forwards;
-    }
+  const getFinalMessage = () => {
+    if (score < 5) return "Too bad, maybe another time";
+    if (score < 10) return "Well done, but not excellent";
+    return "Just too strong!";
+  };
 
-    @keyframes letterIn{
-      0% {opacity:0; transform: scale(0.5) translateY(20px) rotate(-10deg);}
-      60% {opacity:1; transform: scale(1.3) translateY(-10px) rotate(4deg);}
-      100% {opacity:1; transform: scale(1) translateY(0) rotate(0deg);}
-    }
+  if (!started) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-200 to-blue-200 p-6">
+        <Card className="w-full max-w-2xl shadow-xl rounded-2xl p-10 bg-white text-center">
+          <CardContent className="flex flex-col gap-6">
+            <h1 className="text-3xl font-bold">Welcome to the Word Guessing Game</h1>
+            <p className="text-lg text-gray-700">
+              The goal of this game is to guess the meaning of rare and unusual French words. <br />
+              You will face 10 random questions chosen from 60 words. <br />
+              Choose the correct answer to earn points. Try to get the highest score!
+            </p>
+            <Button
+              onClick={() => setStarted(true)}
+              className="rounded-xl p-4 text-lg shadow-md bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              Start Game
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-    .accent{
-      background: linear-gradient(90deg,var(--accent3),var(--accent2));
-      -webkit-background-clip:text;background-clip:text;color:transparent;
-      -webkit-text-stroke: 1px rgba(255,255,255,0.1);
-    }
+  if (fini) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-200 to-blue-200 p-6">
+        <Card className="w-full max-w-2xl shadow-xl rounded-2xl p-10 bg-white text-center">
+          <CardContent className="flex flex-col gap-6">
+            <h1 className="text-3xl font-bold">Game Over</h1>
+            <p className="text-lg">Your final score is: {score} / 10</p>
+            <p className="text-xl font-semibold">{getFinalMessage()}</p>
+            <Button
+              onClick={() => setStarted(false)}
+              className="rounded-xl p-4 text-lg shadow-md bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              Play Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-    .hint{font-size:12px;opacity:0.35;margin-top:14px}
+  const motActuel = questions[index];
+  if (!motActuel) return null;
 
-    @media (max-width:420px){.stage{padding:20px}}
-  </style>
-</head>
-<body>
-  <div class="stage" role="main" aria-live="polite">
-    <div style="position:relative;min-height:1.2em;display:flex;align-items:center;justify-content:center;">
-      <h1 class="hola" id="hola">Hola</h1>
+  return (
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-200 to-blue-200 p-6">
+      <Card className="w-full max-w-2xl shadow-xl rounded-2xl p-6 bg-white h-[90%] flex flex-col justify-between">
+        <CardContent className="flex flex-col items-center gap-6 flex-grow">
+          <h1 className="text-2xl font-bold text-center">Guess the meaning of the word</h1>
+
+          <motion.h2
+            key={motActuel.mot}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-xl font-semibold text-indigo-700"
+          >
+            {motActuel.mot}
+          </motion.h2>
+
+          <div className="grid gap-3 w-full">
+            {melangerTableau(motActuel.choix).map((choix, i) => (
+              <Button
+                key={i}
+                onClick={() => verifierReponse(choix)}
+                className="rounded-xl p-3 shadow-md hover:bg-indigo-100"
+              >
+                {choix}
+              </Button>
+            ))}
+          </div>
+
+          {message && <p className="text-lg font-medium">{message}</p>}
+
+          <p className="text-sm text-gray-600">Score : {score} / {index + 1}</p>
+        </CardContent>
+      </Card>
     </div>
-
-    <div class="message" id="message" aria-hidden="true"></div>
-
-    <div class="hint">(recharge la page pour relancer l'animation)</div>
-  </div>
-
-  <script>
-    const SHOW_MS = 3000;
-    const EXIT_MS = 2000;
-    const LETTER_DELAY = 200;
-
-    document.addEventListener('DOMContentLoaded',()=>{
-      const hola = document.getElementById('hola');
-      const message = document.getElementById('message');
-
-      requestAnimationFrame(()=>{ hola.classList.add('show'); });
-
-      setTimeout(()=>{
-        hola.classList.add('exit');
-        setTimeout(()=>{
-          hola.style.display='none';
-
-          const words = ["I", "wish", "you", "a", "good", "day"];
-          message.setAttribute('aria-hidden','false');
-
-          // Create spans word by word with spaces
-          message.innerHTML = '';
-          let delayCounter = 0;
-
-          words.forEach((word, wi) => {
-            const wordContainer = document.createElement('div');
-            wordContainer.style.display = 'flex';
-            wordContainer.style.gap = '4px';
-
-            word.split('').forEach((ch, i) => {
-              const span = document.createElement('span');
-              span.textContent = ch;
-              span.classList.add('accent');
-              wordContainer.appendChild(span);
-              setTimeout(()=>{
-                span.style.animationDelay = `${delayCounter * LETTER_DELAY}ms`;
-                span.classList.add('show');
-                span.style.animation = `letterIn 0.8s forwards`;
-              }, delayCounter * LETTER_DELAY);
-              delayCounter++;
-            });
-
-            message.appendChild(wordContainer);
-          });
-
-          message.style.opacity = 1;
-
-        }, EXIT_MS);
-      }, SHOW_MS);
-    });
-  </script>
-</body>
-</html>
-
+  );
+}
