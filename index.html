@@ -1,92 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>French Word Quiz</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(90deg, black 33%, gold 33%, gold 66%, red 66%);
-    margin:0; padding:0;
-    display:flex; justify-content:center; align-items:center;
-    height:100vh;
-    overflow:hidden;
-  }
-  #game-container {
-    background:white;
-    padding:30px;
-    border-radius:20px;
-    max-width:600px;
-    width:90%;
-    text-align:center;
-    box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    z-index:2;
-    position:relative;
-  }
-  h1 { color:#b91c1c; margin-bottom:10px; }
-  p { margin:10px 0; }
-  button {
-    padding:12px 25px;
-    margin:10px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    font-size:16px;
-    transition: transform 0.2s, background 0.2s;
-  }
-  button:hover { transform: scale(1.05); }
-  #start-btn, #restart-btn { background:#b91c1c; color:white; }
-  #start-btn:hover, #restart-btn:hover { background:#7f1d1d; }
-  .choice-btn {
-    display:block;
-    width:80%;
-    margin:10px auto;
-    background:#facc15;
-    color:black;
-    font-weight:bold;
-  }
-  .choice-btn:hover { background:#eab308; }
-  #message { font-weight:bold; font-size:18px; margin-top:10px; transition: opacity 0.5s; }
-  .fade-in { animation: fadeIn 0.5s; }
-  @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-  #confetti-canvas {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    pointer-events:none;
-    z-index:1;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>French Word Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(90deg, black 33%, gold 33%, gold 66%, red 66%);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #game-container {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      z-index: 2;
+      position: relative;
+    }
+    h1 { color: #b91c1c; margin-bottom: 10px; }
+    p { margin: 10px 0; }
+    button {
+      padding: 12px 25px;
+      margin: 10px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    button:hover { transform: scale(1.05); }
+    #start-btn, #restart-btn { background: #b91c1c; color: white; }
+    #start-btn:hover, #restart-btn:hover { background: #7f1d1d; }
+    .choice-btn {
+      display: block;
+      width: 80%;
+      margin: 10px auto;
+      background: #facc15;
+      color: black;
+      font-weight: bold;
+    }
+    .choice-btn:hover { background: #eab308; }
+    #message {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 10px;
+      transition: opacity 0.5s;
+    }
+    .fade-in { animation: fadeIn 0.5s; }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
 </head>
 <body>
+  <canvas id="confetti-canvas"></canvas>
+  <div id="game-container">
+    <div id="start-screen">
+      <h1>French Word Quiz</h1>
+      <p>Guess the meaning of rare French words. Try to get the highest score!</p>
+      <button id="start-btn">Start Game</button>
+    </div>
 
-<canvas id="confetti-canvas"></canvas>
+    <div id="quiz-screen" style="display:none;">
+      <h1 id="word" class="fade-in"></h1>
+      <div id="choices"></div>
+      <p id="score"></p>
+      <p id="message"></p>
+    </div>
 
-<div id="game-container">
-  <div id="start-screen">
-    <h1>French Word Quiz</h1>
-    <p>Guess the meaning of rare French words. Try to get the highest score!</p>
-    <button id="start-btn">Start Game</button>
+    <div id="end-screen" style="display:none;">
+      <h1 id="end-title"></h1>
+      <p id="final-score"></p>
+      <p id="final-message"></p>
+      <button id="restart-btn">Play Again</button>
+    </div>
   </div>
 
-  <div id="quiz-screen" style="display:none;">
-    <h1 id="word" class="fade-in"></h1>
-    <div id="choices"></div>
-    <p id="score"></p>
-    <p id="message"></p>
-  </div>
-
-  <div id="end-screen" style="display:none;">
-    <h1 id="end-title"></h1>
-    <p id="final-score"></p>
-    <p id="final-message"></p>
-    <button id="restart-btn">Play Again</button>
-  </div>
-</div>
-
-<script>
-const motsRares = [
+  <script>
+    // Quelques mots rares pour tester (réduits pour la lisibilité)
+    const motsRares = [
   { mot: "Escarboucle", choix: ["Precious stone", "Carpentry tool", "Water bird"], reponse: "Precious stone" },
   { mot: "Chalemie", choix: ["Medieval wind instrument", "Poisonous plant", "Part of a ship"], reponse: "Medieval wind instrument" },
   { mot: "Obombrer", choix: ["To darken with a shadow", "To cover with paint", "To reduce to dust"], reponse: "To darken with a shadow" },
@@ -151,155 +158,156 @@ const motsRares = [
   { mot: "Dysphorie", choix: ["Uneasy feeling", "Ancient coin", "Rare stone"], reponse: "Uneasy feeling" }
 ];
 
-let quizQuestions = [];
-let currentIndex = 0;
-let score = 0;
-let confettiRunning = false;
+    // Mot blague
+    const motsBlagues = [
+      { mot: "Bite", choix: ["Hello", "Harmonica", "Branch"], reponse: "Hello" }
+    ];
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+    let quizQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let confettis = [];
+    let confettiRunning = false;
 
-function startGame() {
-  const canvas = document.getElementById("confetti-canvas");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
 
-  quizQuestions = shuffleArray([...motsRares]).slice(0, 10); 
-  currentIndex = 0;
-  score = 0;
+    function startGame() {
+      stopConfetti(); // clear éventuel
+      quizQuestions = shuffleArray(motsRares).slice(0, 9);
+      quizQuestions.push(motsBlagues[0]); // Ajout blague
+      quizQuestions = shuffleArray(quizQuestions);
 
-  document.getElementById("start-screen").style.display = "none";
-  document.getElementById("end-screen").style.display = "none";
-  document.getElementById("quiz-screen").style.display = "block";
-  showQuestion();
-}
+      currentIndex = 0;
+      score = 0;
 
-function showQuestion() {
-  const q = quizQuestions[currentIndex];
-  const wordElem = document.getElementById("word");
-  wordElem.textContent = q.mot;
-  wordElem.classList.remove("fade-in");
-  void wordElem.offsetWidth;
-  wordElem.classList.add("fade-in");
+      document.getElementById("start-screen").style.display = "none";
+      document.getElementById("end-screen").style.display = "none";
+      document.getElementById("quiz-screen").style.display = "block";
 
-  const choicesDiv = document.getElementById("choices");
-  choicesDiv.innerHTML = "";
-  shuffleArray(q.choix).forEach(choice => {
-    const btn = document.createElement("button");
-    btn.textContent = choice;
-    btn.className = "choice-btn fade-in";
-    btn.onclick = () => checkAnswer(choice);
-    choicesDiv.appendChild(btn);
-  });
+      showQuestion();
+    }
 
-  document.getElementById("score").textContent = `Score: ${score} / ${quizQuestions.length}`;
-  document.getElementById("message").textContent = "";
-}
+    function showQuestion() {
+      const q = quizQuestions[currentIndex];
+      const wordElem = document.getElementById("word");
+      wordElem.textContent = q.mot;
+      wordElem.classList.remove("fade-in");
+      void wordElem.offsetWidth;
+      wordElem.classList.add("fade-in");
 
-function checkAnswer(choice) {
-  const q = quizQuestions[currentIndex];
-  if (choice === q.reponse) score++;
-  document.getElementById("message").textContent = choice === q.reponse ? "✅ Correct answer!" : "❌ Wrong answer!";
-  currentIndex++;
-  setTimeout(() => {
-    if (currentIndex < quizQuestions.length) showQuestion();
-    else endGame();
-  }, 1000);
-}
+      const choicesDiv = document.getElementById("choices");
+      choicesDiv.innerHTML = "";
+      shuffleArray(q.choix).forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.className = "choice-btn fade-in";
+        btn.onclick = () => checkAnswer(choice);
+        choicesDiv.appendChild(btn);
+      });
 
-function endGame() {
-  document.getElementById("quiz-screen").style.display = "none";
-  document.getElementById("end-screen").style.display = "block";
+      document.getElementById("score").textContent = `Score: ${score} / ${currentIndex}`;
+      document.getElementById("message").textContent = "";
+    }
 
-  if (score <= 4) {
-    document.getElementById("end-title").textContent = "Game Over";
-    document.getElementById("final-message").textContent = "Too bad, maybe another time";
-  } else if (score < quizQuestions.length) {
-    document.getElementById("end-title").textContent = "Welcome in Belgium";
-    document.getElementById("final-message").textContent = "Well done, but not excellent";
-  } else {
-    document.getElementById("end-title").textContent = "Welcome in Belgium";
-    document.getElementById("final-message").textContent = "Just too strong!";
-  }
+    function checkAnswer(choice) {
+      const q = quizQuestions[currentIndex];
+      if (choice === q.reponse) score++;
+      document.getElementById("message").textContent =
+        choice === q.reponse ? "✅ Correct answer!" : "❌ Wrong answer!";
+      currentIndex++;
+      setTimeout(() => {
+        if (currentIndex < quizQuestions.length) showQuestion();
+        else endGame();
+      }, 1000);
+    }
 
-  document.getElementById("final-score").textContent = `Your final score: ${score} / ${quizQuestions.length}`;
+    function endGame() {
+      document.getElementById("quiz-screen").style.display = "none";
+      document.getElementById("end-screen").style.display = "block";
 
-  launchConfetti();
-}
-
-function launchConfetti() {
-  const canvas = document.getElementById("confetti-canvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  const confettis = [];
-  const colors = ["#000000", "#FFD700", "#FF0000"];
-  for (let i = 0; i < 150; i++) {
-    confettis.push({ 
-      x: Math.random() * canvas.width, 
-      y: Math.random() * canvas.height - canvas.height, 
-      r: Math.random() * 6 + 4, 
-      d: Math.random() * 0.5 + 0.5, 
-      color: colors[Math.floor(Math.random() * colors.length)], 
-      tilt: Math.random() * 10 - 10 
-    });
-  }
-
-  confettiRunning = true;
-  const startTime = Date.now();
-
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    confettis.forEach(c => {
-      ctx.beginPath();
-      ctx.fillStyle = c.color;
-      ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
-      ctx.fill();
-    });
-
-    confettis.forEach(c => {
-      c.y += c.d*4;
-      if (c.y > canvas.height) {
-        c.y = -10;
-        c.x = Math.random() * canvas.width;
+      if (score <= 4) {
+        document.getElementById("end-title").textContent = "Game Over";
+        document.getElementById("final-message").textContent = "Too bad, maybe another time";
+      } else if (score < 10) {
+        document.getElementById("end-title").textContent = "Not bad!";
+        document.getElementById("final-message").textContent = "Well done, but not excellent";
+      } else {
+        document.getElementById("end-title").textContent = "Perfect!";
+        document.getElementById("final-message").textContent = "Just too strong!";
       }
-    });
+      document.getElementById("final-score").textContent =
+        `Your final score: ${score} / ${quizQuestions.length}`;
 
-    if (Date.now() - startTime < 8000) {
-      requestAnimationFrame(animate); // continue tant que 8 sec
-    } else {
-      // laisse juste finir de tomber sans réapparaître
-      confettis.forEach(c => c.d += 0.05);
-      function fallOut() {
+      launchConfetti();
+    }
+
+    // ---------------- Confettis améliorés ----------------
+    function launchConfetti() {
+      const canvas = document.getElementById("confetti-canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      confettis = [];
+      const colors = ["#000000", "#FFD700", "#FF0000"];
+      for (let i = 0; i < 150; i++) {
+        confettis.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * 0.5 + 0.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 10,
+          dx: Math.random() * 2 - 1
+        });
+      }
+      confettiRunning = true;
+
+      function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         confettis.forEach(c => {
           ctx.beginPath();
           ctx.fillStyle = c.color;
-          ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
+          ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
           ctx.fill();
-          c.y += c.d*4;
         });
-        if (confettis.some(c => c.y < canvas.height)) {
-          requestAnimationFrame(fallOut);
-        }
       }
-      fallOut();
+
+      function update() {
+        confettis.forEach(c => {
+          c.y += c.d * 4;
+          c.x += c.dx;
+        });
+        confettis = confettis.filter(c => c.y < canvas.height + 10);
+      }
+
+      function animate() {
+        if (!confettiRunning && confettis.length === 0) return;
+        draw();
+        update();
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+
+      // Arrêt de la génération après 8 secondes
+      setTimeout(() => {
+        confettiRunning = false;
+      }, 8000);
     }
-  }
-  animate();
-}
 
-document.getElementById("start-btn").onclick = startGame;
-document.getElementById("restart-btn").onclick = startGame;
-</script>
+    function stopConfetti() {
+      const canvas = document.getElementById("confetti-canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettiRunning = false;
+      confettis = [];
+    }
 
+    document.getElementById("start-btn").onclick = startGame;
+    document.getElementById("restart-btn").onclick = startGame;
+  </script>
 </body>
 </html>
-
