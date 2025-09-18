@@ -1,3 +1,6 @@
+"scripts": {
+  "predeploy": "npm run build",
+  "deploy": "gh-pages -d build"
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "./components/ui/card"; // chemins relatifs
 import { Button } from "./components/ui/button";
@@ -168,4 +171,5 @@ export default function JeuMots() {
     </div>
   );
 }
+
 
