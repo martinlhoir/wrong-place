@@ -1,12 +1,44 @@
-"scripts": {
-  "predeploy": "npm run build",
-  "deploy": "gh-pages -d build"
-import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "./components/ui/card"; // chemins relatifs
-import { Button } from "./components/ui/button";
-import { motion } from "framer-motion";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>French Word Quiz</title>
+<style>
+  body { font-family: Arial, sans-serif; background: linear-gradient(to bottom right, #a78bfa, #60a5fa); margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; }
+  #game-container { background:white; padding:30px; border-radius:20px; max-width:600px; width:90%; text-align:center; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+  button { padding:10px 20px; margin:10px; border:none; border-radius:10px; cursor:pointer; background:#6366f1; color:white; font-size:16px; }
+  button:hover { background:#4f46e5; }
+  h1 { color:#4f46e5; }
+  .choice-btn { display:block; width:80%; margin:10px auto; }
+  #message { margin:10px; font-weight:bold; }
+</style>
+</head>
+<body>
 
-// 60 mots pour le quiz
+<div id="game-container">
+  <div id="start-screen">
+    <h1>French Word Quiz</h1>
+    <p>Guess the meaning of rare French words. 10 random questions will be chosen from 60 words. Try to get the highest score!</p>
+    <button id="start-btn">Start Game</button>
+  </div>
+
+  <div id="quiz-screen" style="display:none;">
+    <h1 id="word"></h1>
+    <div id="choices"></div>
+    <p id="score"></p>
+    <p id="message"></p>
+  </div>
+
+  <div id="end-screen" style="display:none;">
+    <h1>Game Over</h1>
+    <p id="final-score"></p>
+    <p id="final-message"></p>
+    <button id="restart-btn">Play Again</button>
+  </div>
+</div>
+
+<script>
 const motsRares = [
   { mot: "Escarboucle", choix: ["Precious stone", "Carpentry tool", "Water bird"], reponse: "Precious stone" },
   { mot: "Chalemie", choix: ["Medieval wind instrument", "Poisonous plant", "Part of a ship"], reponse: "Medieval wind instrument" },
@@ -72,104 +104,67 @@ const motsRares = [
   { mot: "Zythum", choix: ["Ancient beer", "Rare stone", "Old map"], reponse: "Ancient beer" },
 ];
 
-// Mélanger tableau
-function melangerTableau(tableau) {
-  return [...tableau].sort(() => Math.random() - 0.5);
+let quizQuestions = [];
+let currentIndex = 0;
+let score = 0;
+
+function shuffleArray(array) {
+  return array.sort(() => Math.random() - 0.5);
 }
 
-// Jeu complet
-export default function JeuMots() {
-  const [started, setStarted] = useState(false);
-  const [fini, setFini] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [index, setIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (started) {
-      const melange = melangerTableau(motsRares).slice(0, 10); // 10 questions aléatoires
-      setQuestions(melange);
-      setIndex(0);
-      setScore(0);
-      setFini(false);
-    }
-  }, [started]);
-
-  const verifierReponse = (choix) => {
-    if (!questions[index]) return;
-    if (choix === questions[index].reponse) setScore((s) => s + 1);
-    setMessage(choix === questions[index].reponse ? "✅ Correct answer!" : "❌ Wrong answer!");
-    setTimeout(() => {
-      setMessage("");
-      if (index + 1 < 10) setIndex((prev) => prev + 1);
-      else setFini(true);
-    }, 1000);
-  };
-
-  const getFinalMessage = () => {
-    if (score < 5) return "Too bad, maybe another time";
-    if (score < 10) return "Well done, but not excellent";
-    return "Just too strong!";
-  };
-
-  if (!started)
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-200 to-blue-200 p-6">
-        <Card className="w-full max-w-2xl shadow-xl rounded-2xl p-10 bg-white text-center">
-          <CardContent className="flex flex-col gap-6">
-            <h1 className="text-3xl font-bold">Welcome to the Word Guessing Game</h1>
-            <p className="text-lg text-gray-700">
-              The goal is to guess the meaning of rare French words. <br />
-              10 random questions from 60 words. Try to get the highest score!
-            </p>
-            <Button onClick={() => setStarted(true)} className="rounded-xl p-4 text-lg shadow-md bg-indigo-600 text-white hover:bg-indigo-700">
-              Start Game
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-
-  if (fini)
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-200 to-blue-200 p-6">
-        <Card className="w-full max-w-2xl shadow-xl rounded-2xl p-10 bg-white text-center">
-          <CardContent className="flex flex-col gap-6">
-            <h1 className="text-3xl font-bold">Game Over</h1>
-            <p className="text-lg">Your final score is: {score} / 10</p>
-            <p className="text-xl font-semibold">{getFinalMessage()}</p>
-            <Button onClick={() => setStarted(false)} className="rounded-xl p-4 text-lg shadow-md bg-indigo-600 text-white hover:bg-indigo-700">
-              Play Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-
-  const motActuel = questions[index];
-
-  return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-200 to-blue-200 p-6">
-      <Card className="w-full max-w-2xl shadow-xl rounded-2xl p-6 bg-white h-[90%] flex flex-col justify-between">
-        <CardContent className="flex flex-col items-center gap-6 flex-grow">
-          <h1 className="text-2xl font-bold text-center">Guess the meaning of the word</h1>
-          <motion.h2 key={motActuel.mot} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-xl font-semibold text-indigo-700">
-            {motActuel.mot}
-          </motion.h2>
-          <div className="grid gap-3 w-full">
-            {melangerTableau(motActuel.choix).map((choix, i) => (
-              <Button key={i} onClick={() => verifierReponse(choix)} className="rounded-xl p-3 shadow-md hover:bg-indigo-100">
-                {choix}
-              </Button>
-            ))}
-          </div>
-          {message && <p className="text-lg font-medium">{message}</p>}
-          <p className="text-sm text-gray-600">Score : {score} / {index + 1}</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+function startGame() {
+  quizQuestions = shuffleArray(motsRares).slice(0, 10);
+  currentIndex = 0;
+  score = 0;
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("end-screen").style.display = "none";
+  document.getElementById("quiz-screen").style.display = "block";
+  showQuestion();
 }
+
+function showQuestion() {
+  const q = quizQuestions[currentIndex];
+  document.getElementById("word").textContent = q.mot;
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+  shuffleArray(q.choix).forEach(choice => {
+    const btn = document.createElement("button");
+    btn.textContent = choice;
+    btn.className = "choice-btn";
+    btn.onclick = () => checkAnswer(choice);
+    choicesDiv.appendChild(btn);
+  });
+  document.getElementById("score").textContent = `Score: ${score} / ${currentIndex}`;
+  document.getElementById("message").textContent = "";
+}
+
+function checkAnswer(choice) {
+  const q = quizQuestions[currentIndex];
+  if (choice === q.reponse) score++;
+  document.getElementById("message").textContent = choice === q.reponse ? "✅ Correct answer!" : "❌ Wrong answer!";
+  currentIndex++;
+  setTimeout(() => {
+    if (currentIndex < 10) showQuestion();
+    else endGame();
+  }, 1000);
+}
+
+function endGame() {
+  document.getElementById("quiz-screen").style.display = "none";
+  document.getElementById("end-screen").style.display = "block";
+  document.getElementById("final-score").textContent = `Your final score: ${score} / 10`;
+  let msg = "";
+  if (score < 5) msg = "Too bad, maybe another time";
+  else if (score < 10) msg = "Well done, but not excellent";
+  else msg = "Just too strong!";
+  document.getElementById("final-message").textContent = msg;
+}
+
+document.getElementById("start-btn").onclick = startGame;
+document.getElementById("restart-btn").onclick = startGame;
+</script>
+
+</body>
+</html>
 
 
