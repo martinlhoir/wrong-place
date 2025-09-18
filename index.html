@@ -169,7 +169,7 @@ function startGame() {
   const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  quizQuestions = shuffleArray([...motsRares]).slice(0, 3); // exemple avec 3 questions
+  quizQuestions = shuffleArray([...motsRares]).slice(0, 10); 
   currentIndex = 0;
   score = 0;
 
@@ -216,7 +216,7 @@ function endGame() {
   document.getElementById("quiz-screen").style.display = "none";
   document.getElementById("end-screen").style.display = "block";
 
-  if (score <= 1) {
+  if (score <= 4) {
     document.getElementById("end-title").textContent = "Game Over";
     document.getElementById("final-message").textContent = "Too bad, maybe another time";
   } else if (score < quizQuestions.length) {
@@ -302,3 +302,4 @@ document.getElementById("restart-btn").onclick = startGame;
 
 </body>
 </html>
+
