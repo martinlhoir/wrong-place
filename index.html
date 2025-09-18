@@ -5,33 +5,81 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>French Word Quiz</title>
 <style>
-  body { font-family: Arial, sans-serif; background: linear-gradient(to bottom right, #a78bfa, #60a5fa); margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; }
-  #game-container { background:white; padding:30px; border-radius:20px; max-width:600px; width:90%; text-align:center; box-shadow: 0 0 20px rgba(0,0,0,0.3); }
-  button { padding:10px 20px; margin:10px; border:none; border-radius:10px; cursor:pointer; background:#6366f1; color:white; font-size:16px; }
-  button:hover { background:#4f46e5; }
-  h1 { color:#4f46e5; }
-  .choice-btn { display:block; width:80%; margin:10px auto; }
-  #message { margin:10px; font-weight:bold; }
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(90deg, black 33%, gold 33%, gold 66%, red 66%);
+    margin:0; padding:0;
+    display:flex; justify-content:center; align-items:center;
+    height:100vh;
+    overflow:hidden;
+  }
+  #game-container {
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    max-width:600px;
+    width:90%;
+    text-align:center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    z-index:2;
+    position:relative;
+  }
+  h1 { color:#b91c1c; margin-bottom:10px; }
+  p { margin:10px 0; }
+  button {
+    padding:12px 25px;
+    margin:10px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px;
+    transition: transform 0.2s, background 0.2s;
+  }
+  button:hover { transform: scale(1.05); }
+  #start-btn, #restart-btn { background:#b91c1c; color:white; }
+  #start-btn:hover, #restart-btn:hover { background:#7f1d1d; }
+  .choice-btn {
+    display:block;
+    width:80%;
+    margin:10px auto;
+    background:#facc15;
+    color:black;
+    font-weight:bold;
+  }
+  .choice-btn:hover { background:#eab308; }
+  #message { font-weight:bold; font-size:18px; margin-top:10px; transition: opacity 0.5s; }
+  .fade-in { animation: fadeIn 0.5s; }
+  @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    z-index:1;
+  }
 </style>
 </head>
 <body>
 
+<canvas id="confetti-canvas"></canvas>
+
 <div id="game-container">
   <div id="start-screen">
     <h1>French Word Quiz</h1>
-    <p>Guess the meaning of rare French words. 10 random questions will be chosen from 60 words. Try to get the highest score!</p>
+    <p>Guess the meaning of rare French words. Try to get the highest score!</p>
     <button id="start-btn">Start Game</button>
   </div>
 
   <div id="quiz-screen" style="display:none;">
-    <h1 id="word"></h1>
+    <h1 id="word" class="fade-in"></h1>
     <div id="choices"></div>
     <p id="score"></p>
     <p id="message"></p>
   </div>
 
   <div id="end-screen" style="display:none;">
-    <h1>Game Over</h1>
+    <h1 id="end-title"></h1>
     <p id="final-score"></p>
     <p id="final-message"></p>
     <button id="restart-btn">Play Again</button>
@@ -39,6 +87,7 @@
 </div>
 
 <script>
+// === QUESTIONS ===
 const motsRares = [
   { mot: "Escarboucle", choix: ["Precious stone", "Carpentry tool", "Water bird"], reponse: "Precious stone" },
   { mot: "Chalemie", choix: ["Medieval wind instrument", "Poisonous plant", "Part of a ship"], reponse: "Medieval wind instrument" },
@@ -76,32 +125,29 @@ const motsRares = [
   { mot: "Xylographie", choix: ["Wood engraving", "Ancient map", "Rare jewel"], reponse: "Wood engraving" },
   { mot: "Ypérite", choix: ["Mustard gas", "Old book", "Rare flower"], reponse: "Mustard gas" },
   { mot: "Zélateur", choix: ["Zealot", "Small tool", "Ancient coin"], reponse: "Zealot" },
-  { mot: "Aboulie", choix: ["Lack of willpower", "Ancient coin", "Rare stone"], reponse: "Lack of willpower" },
-  { mot: "Boustifailler", choix: ["To eat greedily", "Type of tool", "Old musical instrument"], reponse: "To eat greedily" },
-  { mot: "Cacique", choix: ["Tribal chief", "Rare flower", "Ancient map"], reponse: "Tribal chief" },
-  { mot: "Dysphorie", choix: ["Unease or dissatisfaction", "Ancient coin", "Old weapon"], reponse: "Unease or dissatisfaction" },
-  { mot: "Enclume", choix: ["Anvil", "Rare plant", "Old hat"], reponse: "Anvil" },
-  { mot: "Falbala", choix: ["Frill or ruffle", "Ancient map", "Rare stone"], reponse: "Frill or ruffle" },
-  { mot: "Gouailleur", choix: ["Cheeky person", "Ancient tool", "Rare bird"], reponse: "Cheeky person" },
-  { mot: "Hiatus", choix: ["Gap or pause", "Rare mineral", "Old coin"], reponse: "Gap or pause" },
-  { mot: "Ignare", choix: ["Ignorant person", "Ancient book", "Rare plant"], reponse: "Ignorant person" },
-  { mot: "Joubarbe", choix: ["Houseleek plant", "Ancient weapon", "Rare flower"], reponse: "Houseleek plant" },
-  { mot: "Kératose", choix: ["Horny skin condition", "Old coin", "Ancient tool"], reponse: "Horny skin condition" },
-  { mot: "Lugubre", choix: ["Gloomy or dark", "Rare instrument", "Ancient map"], reponse: "Gloomy or dark" },
-  { mot: "Miasme", choix: ["Unpleasant vapor", "Old book", "Rare mineral"], reponse: "Unpleasant vapor" },
-  { mot: "Néphélococcygie", choix: ["Cloud cuckoo land", "Ancient coin", "Old tool"], reponse: "Cloud cuckoo land" },
-  { mot: "Obséquieux", choix: ["Obsequious", "Rare stone", "Ancient bird"], reponse: "Obsequious" },
-  { mot: "Phrénologie", choix: ["Study of skull shape", "Ancient map", "Old plant"], reponse: "Study of skull shape" },
-  { mot: "Quérulence", choix: ["Complaining", "Ancient coin", "Rare mineral"], reponse: "Complaining" },
-  { mot: "Rubicond", choix: ["Red-faced", "Rare plant", "Ancient weapon"], reponse: "Red-faced" },
-  { mot: "Saponifier", choix: ["To turn into soap", "Ancient book", "Old coin"], reponse: "To turn into soap" },
-  { mot: "Ténébreux", choix: ["Dark or gloomy", "Old tool", "Rare jewel"], reponse: "Dark or gloomy" },
-  { mot: "Ursidé", choix: ["Bear family", "Ancient instrument", "Rare plant"], reponse: "Bear family" },
-  { mot: "Vaticiner", choix: ["To prophesy", "Old coin", "Rare stone"], reponse: "To prophesy" },
-  { mot: "Wapiti", choix: ["Elk", "Ancient tool", "Rare flower"], reponse: "Elk" },
-  { mot: "Xénophile", choix: ["Loves foreigners", "Old weapon", "Rare plant"], reponse: "Loves foreigners" },
-  { mot: "Yogi", choix: ["Practitioner of yoga", "Ancient coin", "Rare bird"], reponse: "Practitioner of yoga" },
-  { mot: "Zythum", choix: ["Ancient beer", "Rare stone", "Old map"], reponse: "Ancient beer" },
+  { mot: "Aboulie", choix: ["Lack of willpower", "Ancient ship", "Type of hat"], reponse: "Lack of willpower" },
+  { mot: "Boustifaille", choix: ["Hearty meal", "Ancient currency", "Rare plant"], reponse: "Hearty meal" },
+  { mot: "Cymbalum", choix: ["Percussion instrument", "Rare bird", "Type of robe"], reponse: "Percussion instrument" },
+  { mot: "Dégingandé", choix: ["Awkwardly tall", "Rare gemstone", "Ancient tool"], reponse: "Awkwardly tall" },
+  { mot: "Échauguette", choix: ["Watchtower", "Religious object", "Ancient coin"], reponse: "Watchtower" },
+  { mot: "Flibustier", choix: ["Pirate", "Ancient bread", "Rare metal"], reponse: "Pirate" },
+  { mot: "Galimatias", choix: ["Confused speech", "Ancient ritual", "Rare fish"], reponse: "Confused speech" },
+  { mot: "Haridelle", choix: ["Old horse", "Type of cart", "Ancient clothing"], reponse: "Old horse" },
+  { mot: "Imbroglio", choix: ["Complicated situation", "Ancient path", "Rare jewel"], reponse: "Complicated situation" },
+  { mot: "Jérémiade", choix: ["Complaint", "Ancient tool", "Rare fruit"], reponse: "Complaint" },
+  { mot: "Katana", choix: ["Japanese sword", "Ancient tax", "Rare bird"], reponse: "Japanese sword" },
+  { mot: "Lacis", choix: ["Network of paths", "Ancient drum", "Rare spice"], reponse: "Network of paths" },
+  { mot: "Madrigal", choix: ["Short poem", "Rare jewel", "Ancient robe"], reponse: "Short poem" },
+  { mot: "Nabab", choix: ["Wealthy person", "Ancient boat", "Rare plant"], reponse: "Wealthy person" },
+  { mot: "Olibrius", choix: ["Odd person", "Ancient hat", "Rare fish"], reponse: "Odd person" },
+  { mot: "Palindrome", choix: ["Word same backward", "Ancient map", "Rare stone"], reponse: "Word same backward" },
+  { mot: "Quolibet", choix: ["Witty remark", "Ancient clothing", "Rare tree"], reponse: "Witty remark" },
+  { mot: "Rocambolesque", choix: ["Fantastic", "Ancient ship", "Rare food"], reponse: "Fantastic" },
+  { mot: "Sardanapale", choix: ["Luxurious person", "Ancient weapon", "Rare ritual"], reponse: "Luxurious person" },
+  { mot: "Tintamarre", choix: ["Loud noise", "Ancient coin", "Rare plant"], reponse: "Loud noise" },
+  { mot: "Ulcération", choix: ["Wound", "Ancient robe", "Rare bird"], reponse: "Wound" },
+  { mot: "Vaticination", choix: ["Prophecy", "Ancient weapon", "Rare jewel"], reponse: "Prophecy" },
+  { mot: "Zigomar", choix: ["Mischievous person", "Ancient tax", "Rare plant"], reponse: "Mischievous person" }
 ];
 
 let quizQuestions = [];
@@ -124,16 +170,22 @@ function startGame() {
 
 function showQuestion() {
   const q = quizQuestions[currentIndex];
-  document.getElementById("word").textContent = q.mot;
+  const wordElem = document.getElementById("word");
+  wordElem.textContent = q.mot;
+  wordElem.classList.remove("fade-in");
+  void wordElem.offsetWidth; // restart animation
+  wordElem.classList.add("fade-in");
+
   const choicesDiv = document.getElementById("choices");
   choicesDiv.innerHTML = "";
   shuffleArray(q.choix).forEach(choice => {
     const btn = document.createElement("button");
     btn.textContent = choice;
-    btn.className = "choice-btn";
+    btn.className = "choice-btn fade-in";
     btn.onclick = () => checkAnswer(choice);
     choicesDiv.appendChild(btn);
   });
+
   document.getElementById("score").textContent = `Score: ${score} / ${currentIndex}`;
   document.getElementById("message").textContent = "";
 }
@@ -152,12 +204,69 @@ function checkAnswer(choice) {
 function endGame() {
   document.getElementById("quiz-screen").style.display = "none";
   document.getElementById("end-screen").style.display = "block";
+
+  // Score et titre conditionnel
+  if (score <= 4) {
+    document.getElementById("end-title").textContent = "Game Over";
+  } else {
+    document.getElementById("end-title").textContent = "Welcome in Belgium";
+  }
+
   document.getElementById("final-score").textContent = `Your final score: ${score} / 10`;
+
   let msg = "";
   if (score < 5) msg = "Too bad, maybe another time";
   else if (score < 10) msg = "Well done, but not excellent";
   else msg = "Just too strong!";
   document.getElementById("final-message").textContent = msg;
+
+  // 🎉 Lancer confettis
+  launchConfetti();
+}
+
+// === CONFETTI ===
+function launchConfetti() {
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confettis = [];
+  const colors = ["#000000", "#FFD700", "#FF0000"]; // drapeau belge
+
+  for (let i = 0; i < 150; i++) {
+    confettis.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 6 + 4,
+      d: Math.random() * 0.5 + 0.5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 10
+    });
+  }
+
+  function drawConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    confettis.forEach(c => {
+      ctx.beginPath();
+      ctx.fillStyle = c.color;
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2, true);
+      ctx.fill();
+    });
+    updateConfetti();
+  }
+
+  function updateConfetti() {
+    confettis.forEach(c => {
+      c.y += c.d * 4;
+      if (c.y > canvas.height) {
+        c.y = -10;
+        c.x = Math.random() * canvas.width;
+      }
+    });
+  }
+
+  setInterval(drawConfetti, 20);
 }
 
 document.getElementById("start-btn").onclick = startGame;
