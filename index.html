@@ -3,7 +3,7 @@ import { Card, CardContent } from "./components/ui/card"; // chemins relatifs
 import { Button } from "./components/ui/button";
 import { motion } from "framer-motion";
 
-// 60 mots
+// 60 mots pour le quiz
 const motsRares = [
   { mot: "Escarboucle", choix: ["Precious stone", "Carpentry tool", "Water bird"], reponse: "Precious stone" },
   { mot: "Chalemie", choix: ["Medieval wind instrument", "Poisonous plant", "Part of a ship"], reponse: "Medieval wind instrument" },
@@ -15,7 +15,58 @@ const motsRares = [
   { mot: "Péroraison", choix: ["Conclusion of a speech", "Agricultural tool", "Religious ritual"], reponse: "Conclusion of a speech" },
   { mot: "Luzerne", choix: ["Forage plant", "Precious stone", "Type of ship"], reponse: "Forage plant" },
   { mot: "Mirliton", choix: ["Small musical instrument", "Bird", "Ancient pastry"], reponse: "Small musical instrument" },
-  // … (ajoute les 50 autres mots ici pour avoir 60)
+  { mot: "Alcarazas", choix: ["Large ceramic jar", "Ancient helmet", "Old currency"], reponse: "Large ceramic jar" },
+  { mot: "Boustrophédon", choix: ["Ancient writing style", "Musical instrument", "Type of sword"], reponse: "Ancient writing style" },
+  { mot: "Cacochyme", choix: ["Weak or sickly person", "Rare mineral", "Old clothing"], reponse: "Weak or sickly person" },
+  { mot: "Didascalie", choix: ["Stage direction", "Type of food", "Mathematical term"], reponse: "Stage direction" },
+  { mot: "Eburnéen", choix: ["Ivory-colored", "Poisonous plant", "Small bird"], reponse: "Ivory-colored" },
+  { mot: "Farfelu", choix: ["Crazy or odd", "Precious stone", "Type of boat"], reponse: "Crazy or odd" },
+  { mot: "Gabelle", choix: ["Salt tax", "Ancient weapon", "Musical note"], reponse: "Salt tax" },
+  { mot: "Histrion", choix: ["Actor or performer", "Rare coin", "Type of fruit"], reponse: "Actor or performer" },
+  { mot: "Inénarrable", choix: ["Indescribable", "Old ship", "Rare book"], reponse: "Indescribable" },
+  { mot: "Jocrisse", choix: ["Foolish person", "Ancient hat", "Type of tree"], reponse: "Foolish person" },
+  { mot: "Kermesse", choix: ["Village fair", "Type of drum", "Old coin"], reponse: "Village fair" },
+  { mot: "Limonadier", choix: ["Lemon seller", "Ancient ruler", "Stage equipment"], reponse: "Lemon seller" },
+  { mot: "Mandibule", choix: ["Jawbone", "Tool", "Type of hat"], reponse: "Jawbone" },
+  { mot: "Nitescence", choix: ["Brightness", "Ancient path", "Rare gemstone"], reponse: "Brightness" },
+  { mot: "Obnubilé", choix: ["Obscured", "Rare instrument", "Old letter"], reponse: "Obscured" },
+  { mot: "Pusillanime", choix: ["Cowardly", "Small tool", "Rare bird"], reponse: "Cowardly" },
+  { mot: "Quidam", choix: ["Someone", "Ancient coin", "Type of fish"], reponse: "Someone" },
+  { mot: "Ratiociner", choix: ["To reason", "Old book", "Ancient clothing"], reponse: "To reason" },
+  { mot: "Sésame", choix: ["Sesame", "Rare stone", "Ancient weapon"], reponse: "Sesame" },
+  { mot: "Tautologie", choix: ["Redundant expression", "Mathematical term", "Old ritual"], reponse: "Redundant expression" },
+  { mot: "Ubiquité", choix: ["Ubiquity", "Rare bird", "Ancient path"], reponse: "Ubiquity" },
+  { mot: "Velléitaire", choix: ["Indecisive", "Small coin", "Old tool"], reponse: "Indecisive" },
+  { mot: "Wassingue", choix: ["Mop", "Ancient tool", "Rare plant"], reponse: "Mop" },
+  { mot: "Xylographie", choix: ["Wood engraving", "Ancient map", "Rare jewel"], reponse: "Wood engraving" },
+  { mot: "Ypérite", choix: ["Mustard gas", "Old book", "Rare flower"], reponse: "Mustard gas" },
+  { mot: "Zélateur", choix: ["Zealot", "Small tool", "Ancient coin"], reponse: "Zealot" },
+  { mot: "Aboulie", choix: ["Lack of willpower", "Ancient coin", "Rare stone"], reponse: "Lack of willpower" },
+  { mot: "Boustifailler", choix: ["To eat greedily", "Type of tool", "Old musical instrument"], reponse: "To eat greedily" },
+  { mot: "Cacique", choix: ["Tribal chief", "Rare flower", "Ancient map"], reponse: "Tribal chief" },
+  { mot: "Dysphorie", choix: ["Unease or dissatisfaction", "Ancient coin", "Old weapon"], reponse: "Unease or dissatisfaction" },
+  { mot: "Enclume", choix: ["Anvil", "Rare plant", "Old hat"], reponse: "Anvil" },
+  { mot: "Falbala", choix: ["Frill or ruffle", "Ancient map", "Rare stone"], reponse: "Frill or ruffle" },
+  { mot: "Gouailleur", choix: ["Cheeky person", "Ancient tool", "Rare bird"], reponse: "Cheeky person" },
+  { mot: "Hiatus", choix: ["Gap or pause", "Rare mineral", "Old coin"], reponse: "Gap or pause" },
+  { mot: "Ignare", choix: ["Ignorant person", "Ancient book", "Rare plant"], reponse: "Ignorant person" },
+  { mot: "Joubarbe", choix: ["Houseleek plant", "Ancient weapon", "Rare flower"], reponse: "Houseleek plant" },
+  { mot: "Kératose", choix: ["Horny skin condition", "Old coin", "Ancient tool"], reponse: "Horny skin condition" },
+  { mot: "Lugubre", choix: ["Gloomy or dark", "Rare instrument", "Ancient map"], reponse: "Gloomy or dark" },
+  { mot: "Miasme", choix: ["Unpleasant vapor", "Old book", "Rare mineral"], reponse: "Unpleasant vapor" },
+  { mot: "Néphélococcygie", choix: ["Cloud cuckoo land", "Ancient coin", "Old tool"], reponse: "Cloud cuckoo land" },
+  { mot: "Obséquieux", choix: ["Obsequious", "Rare stone", "Ancient bird"], reponse: "Obsequious" },
+  { mot: "Phrénologie", choix: ["Study of skull shape", "Ancient map", "Old plant"], reponse: "Study of skull shape" },
+  { mot: "Quérulence", choix: ["Complaining", "Ancient coin", "Rare mineral"], reponse: "Complaining" },
+  { mot: "Rubicond", choix: ["Red-faced", "Rare plant", "Ancient weapon"], reponse: "Red-faced" },
+  { mot: "Saponifier", choix: ["To turn into soap", "Ancient book", "Old coin"], reponse: "To turn into soap" },
+  { mot: "Ténébreux", choix: ["Dark or gloomy", "Old tool", "Rare jewel"], reponse: "Dark or gloomy" },
+  { mot: "Ursidé", choix: ["Bear family", "Ancient instrument", "Rare plant"], reponse: "Bear family" },
+  { mot: "Vaticiner", choix: ["To prophesy", "Old coin", "Rare stone"], reponse: "To prophesy" },
+  { mot: "Wapiti", choix: ["Elk", "Ancient tool", "Rare flower"], reponse: "Elk" },
+  { mot: "Xénophile", choix: ["Loves foreigners", "Old weapon", "Rare plant"], reponse: "Loves foreigners" },
+  { mot: "Yogi", choix: ["Practitioner of yoga", "Ancient coin", "Rare bird"], reponse: "Practitioner of yoga" },
+  { mot: "Zythum", choix: ["Ancient beer", "Rare stone", "Old map"], reponse: "Ancient beer" },
 ];
 
 // Mélanger tableau
@@ -23,6 +74,7 @@ function melangerTableau(tableau) {
   return [...tableau].sort(() => Math.random() - 0.5);
 }
 
+// Jeu complet
 export default function JeuMots() {
   const [started, setStarted] = useState(false);
   const [fini, setFini] = useState(false);
@@ -33,7 +85,7 @@ export default function JeuMots() {
 
   useEffect(() => {
     if (started) {
-      const melange = melangerTableau(motsRares).slice(0, 10);
+      const melange = melangerTableau(motsRares).slice(0, 10); // 10 questions aléatoires
       setQuestions(melange);
       setIndex(0);
       setScore(0);
@@ -116,3 +168,4 @@ export default function JeuMots() {
     </div>
   );
 }
+
