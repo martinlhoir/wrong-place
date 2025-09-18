@@ -237,10 +237,6 @@ function endGame() {
   document.getElementById("final-score").textContent = `Your final score: ${score} / 10`;
   document.getElementById("final-message").textContent = score < 5 ? "Too bad, maybe another time" : (score < 10 ? "Well done, but not excellent" : "Just too strong!");
 
-  launchConfetti();
-}
-
-// === CONFETTI ===
 function launchConfetti() {
   const canvas = document.getElementById("confetti-canvas");
   const ctx = canvas.getContext("2d");
@@ -269,10 +265,23 @@ function launchConfetti() {
       ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2, true);
       ctx.fill();
     });
-    confettis.forEach(c => { c.y += c.d * 4; if (c.y > canvas.height) { c.y = -10; c.x = Math.random() * canvas.width; } });
+    confettis.forEach(c => { 
+      c.y += c.d * 4; 
+      if (c.y > canvas.height) { 
+        c.y = -10; 
+        c.x = Math.random() * canvas.width; 
+      } 
+    });
   }
 
   confettiInterval = setInterval(drawConfetti, 20);
+
+  // 🔹 arrêter après 5 secondes
+  setTimeout(() => {
+    clearInterval(confettiInterval);
+    confettiInterval = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, 5000);
 }
 
 document.getElementById("start-btn").onclick = startGame;
@@ -281,3 +290,4 @@ document.getElementById("restart-btn").onclick = startGame;
 
 </body>
 </html>
+
